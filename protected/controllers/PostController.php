@@ -26,35 +26,55 @@ class PostController extends Controller
 	 */
 	public function accessRules()
 	{
-		return array(
-			array('allow',  // allow all users to perform 'index' and 'view' actions
-				'actions'=>array('index','view'),
-				'users'=>array('*'),
-			),
-			array('allow', // allow authenticated user to perform 'create' and 'update' actions
-				'actions'=>array('create','update'),
-				'users'=>array('@'),
-			),
-			array('allow', // allow admin user to perform 'admin' and 'delete' actions
-				'actions'=>array('admin','delete'),
-				'users'=>array('admin'),
-			),
-			array('deny',  // deny all users
-				'users'=>array('*'),
-			),
-		);
+	    return array(
+	        array('allow',  // allow all users to perform 'list' and 'show' actions
+	            'actions'=>array('index', 'view'),
+	            'users'=>array('*'),
+	        ),
+	        array('allow', // allow authenticated users to perform any action
+	            'users'=>array('@'), //@ authenticated, * everything else
+	        ),
+	        array('deny',  // deny all users
+	            'users'=>array('*'),
+	        ),
+	    );
 	}
 
 	/**
 	 * Displays a particular model.
 	 * @param integer $id the ID of the model to be displayed
 	 */
-	public function actionView($id)
+	public function actionView()
 	{
+		$post=$this->loadModel();
+		$comment=$this->newComment($post); // calling this method before rendering the view.
 		$this->render('view',array(
-			'model'=>$this->loadModel($id),
+			'model'=>$post,
+			'comment'=>$comment,
 		));
 	}
+
+	protected function newComment($post) 
+	{
+		$comment=new Comment;
+
+		if(isset($_POST['ajax']) && $_POST['afax']=='comment_form') // checks whether there is a post variable named AJAX and whether it equals to 'comment-_form'
+		{
+			echo CActiveForm::validate($comment);
+			Yii::app()->end();
+		}
+		if(isset($_POST['Comment']))
+		{
+			$comment->attributes=$_POST['Comment'];
+			if($post->addComment($comment))
+			{
+				if($comment->status==Comment::STATUS_PENDING)
+					Yii::app()->user->setFlash('commentSubmitted','Thank you for your comment. Your comment will be posted once it is approved.');
+				$this->refresh();
+			}
+		}
+	}
+
 
 	/**
 	 * Creates a new model.
@@ -108,13 +128,25 @@ class PostController extends Controller
 	 * If deletion is successful, the browser will be redirected to the 'admin' page.
 	 * @param integer $id the ID of the model to be deleted
 	 */
-	public function actionDelete($id)
+	public function actionDelete()
 	{
-		$this->loadModel($id)->delete();
+	    if(Yii::app()->request->isPostRequest) // Only allowing deletions via post request
+	    {
+	        // we only allow deletion via POST request
+	        $this->loadModel()->delete();
+	
+	        if(!isset($_GET['ajax'])) // only reload if it was not an ajax call
+	            $this->redirect(array('index'));
+	    }
+	    else
+	        throw new CHttpException(400,'Invalid request. Please do not repeat this request again.');
+	}
 
-		// if AJAX request (triggered by deletion via admin grid view), we should not redirect the browser
-		if(!isset($_GET['ajax']))
-			$this->redirect(isset($_POST['returnUrl']) ? $_POST['returnUrl'] : array('admin'));
+	protected function afterDelete()
+	{
+	    parent::afterDelete(); // doing the afterDelete action of the class it inherits from
+	    Comment::model()->deleteAll('post_id='.$this->id); // deletes the comments for that post
+	    Tag::model()->updateFrequency($this->tags, ''); // updates the tags to nothing
 	}
 
 	/**
@@ -122,10 +154,27 @@ class PostController extends Controller
 	 */
 	public function actionIndex()
 	{
-		$dataProvider=new CActiveDataProvider('Post');
-		$this->render('index',array(
-			'dataProvider'=>$dataProvider,
-		));
+		$criteria=new CDbCriteria(array(
+	        'condition'=>'status='.Post::STATUS_PUBLISHED,
+	        'order'=>'update_time DESC', // sorting time
+	        'with'=>'commentCount', // display how many comments were left
+	    )); // creating a new (query) CDbCriteria for retrieving post list
+
+	    if(isset($_GET['tag'])) // if user wants to look for a specific tag
+	        $criteria->addSearchCondition('tags',$_GET['tag']); // actual method in CDbCriteria object
+	 	
+	 	//resulting object which is going to have all the information needed to display an object
+	    // three purposes 1) pagination, 2) sorting according to the user's request 3)feeds the paginated and sorted data to widgets or view code for presentation.
+	    $dataProvider=new CActiveDataProvider('Post', array(
+	        'pagination'=>array(
+	            'pageSize'=>5,
+	        ),
+	        'criteria'=>$criteria,
+	    ));
+	 
+	    $this->render('index',array(
+	        'dataProvider'=>$dataProvider,
+	    ));
 	}
 
 	/**
@@ -133,12 +182,12 @@ class PostController extends Controller
 	 */
 	public function actionAdmin()
 	{
-		$model=new Post('search');
+		$model=new Post('search'); // creates a POst model under search scenario.
 		$model->unsetAttributes();  // clear any default values
 		if(isset($_GET['Post']))
-			$model->attributes=$_GET['Post'];
+			$model->attributes=$_GET['Post']; // collectin the search condition that a user specifies(user supplied data)
 
-		$this->render('admin',array(
+		$this->render('admin',array( // finally render this information to the admin view
 			'model'=>$model,
 		));
 	}
@@ -150,12 +199,27 @@ class PostController extends Controller
 	 * @return Post the loaded model
 	 * @throws CHttpException
 	 */
-	public function loadModel($id)
+	public function loadModel()
 	{
-		$model=Post::model()->findByPk($id);
-		if($model===null)
-			throw new CHttpException(404,'The requested page does not exist.');
-		return $model;
+	    if($this->_model===null)
+	    {
+	        if(isset($_GET['id'])) // returning the SQL statement
+	        {
+	        	// If the user is authenticated and is a Guest only allow him to view Published and archived posts.
+	            if(Yii::app()->user->isGuest)
+	            	// This syntax is a bit confusing. But you are setting the condition varable to some constant
+	                $condition='status='.Post::STATUS_PUBLISHED
+	                    .' OR status='.Post::STATUS_ARCHIVED;
+	            else
+	            	// or nothing
+	                $condition='';
+	            // Finding a post by a Pk? $_GET['id'] returns a primary key? Finds a single active record with a specified primary key.
+	            $this->_model=Post::model()->findByPk($_GET['id'], $condition); //findBySql(string $sql, array $params=array ( ))
+	        }
+	        if($this->_model===null)
+	            throw new CHttpException(404,'The requested page does not exist.');
+	    }
+	    return $this->_model;
 	}
 
 	/**
