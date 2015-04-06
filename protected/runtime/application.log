@@ -82,3 +82,43 @@ REQUEST_URI=/blog/index.php?r=site/login
 in /Applications/MAMP/htdocs/blog/protected/models/User.php (107)
 in /Applications/MAMP/htdocs/blog/protected/components/UserIdentity.php (32)
 in /Applications/MAMP/htdocs/blog/protected/models/LoginForm.php (52)
+2015/04/06 15:48:56 [error] [exception.CHttpException.404] exception 'CHttpException' with message 'The system is unable to find the requested action "post".' in /Applications/MAMP/yii/framework/web/CController.php:483
+Stack trace:
+#0 /Applications/MAMP/yii/framework/web/CController.php(270): CController->missingAction('post')
+#1 /Applications/MAMP/yii/framework/web/CWebApplication.php(282): CController->run('post')
+#2 /Applications/MAMP/yii/framework/web/CWebApplication.php(141): CWebApplication->runController('site/post')
+#3 /Applications/MAMP/yii/framework/base/CApplication.php(169): CWebApplication->processRequest()
+#4 /Applications/MAMP/htdocs/blog/index.php(13): CApplication->run()
+#5 {main}
+REQUEST_URI=/blog/index.php?r=site/post
+---
+2015/04/06 15:49:25 [error] [exception.CHttpException.404] exception 'CHttpException' with message 'The system is unable to find the requested action "page".' in /Applications/MAMP/yii/framework/web/CController.php:483
+Stack trace:
+#0 /Applications/MAMP/yii/framework/web/CController.php(270): CController->missingAction('page')
+#1 /Applications/MAMP/yii/framework/web/CWebApplication.php(282): CController->run('page')
+#2 /Applications/MAMP/yii/framework/web/CWebApplication.php(141): CWebApplication->runController('post/page')
+#3 /Applications/MAMP/yii/framework/base/CApplication.php(169): CWebApplication->processRequest()
+#4 /Applications/MAMP/htdocs/blog/index.php(13): CApplication->run()
+#5 {main}
+REQUEST_URI=/blog/index.php?r=post/page&view=about
+---
+2015/04/06 15:49:35 [error] [exception.CException] exception 'CException' with message 'Property "PostController._model" is not defined.' in /Applications/MAMP/yii/framework/base/CComponent.php:130
+Stack trace:
+#0 /Applications/MAMP/htdocs/blog/protected/controllers/PostController.php(204): CComponent->__get('_model')
+#1 /Applications/MAMP/htdocs/blog/protected/controllers/PostController.php(49): PostController->loadModel()
+#2 /Applications/MAMP/yii/framework/web/actions/CInlineAction.php(49): PostController->actionView()
+#3 /Applications/MAMP/yii/framework/web/CController.php(308): CInlineAction->runWithParams(Array)
+#4 /Applications/MAMP/yii/framework/web/filters/CFilterChain.php(133): CController->runAction(Object(CInlineAction))
+#5 /Applications/MAMP/yii/framework/web/filters/CFilter.php(40): CFilterChain->run()
+#6 /Applications/MAMP/yii/framework/web/CController.php(1145): CFilter->filter(Object(CFilterChain))
+#7 /Applications/MAMP/yii/framework/web/filters/CInlineFilter.php(58): CController->filterAccessControl(Object(CFilterChain))
+#8 /Applications/MAMP/yii/framework/web/filters/CFilterChain.php(130): CInlineFilter->filter(Object(CFilterChain))
+#9 /Applications/MAMP/yii/framework/web/CController.php(291): CFilterChain->run()
+#10 /Applications/MAMP/yii/framework/web/CController.php(265): CController->runActionWithFilters(Object(CInlineAction), Array)
+#11 /Applications/MAMP/yii/framework/web/CWebApplication.php(282): CController->run('view')
+#12 /Applications/MAMP/yii/framework/web/CWebApplication.php(141): CWebApplication->runController('post/view')
+#13 /Applications/MAMP/yii/framework/base/CApplication.php(169): CWebApplication->processRequest()
+#14 /Applications/MAMP/htdocs/blog/index.php(13): CApplication->run()
+#15 {main}
+REQUEST_URI=/blog/index.php?r=post/view
+---

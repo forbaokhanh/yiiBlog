@@ -8,7 +8,7 @@
 
 <?php $form=$this->beginWidget('CActiveForm', array(
 	'id'=>'comment-form',
-	'enableAjaxValidation'=>true,
+	'enableAjaxValidation'=>true, // this changes to true in order to enhance user experience.
 )); ?>
 
 	<p class="note">Fields with <span class="required">*</span> are required.</p>

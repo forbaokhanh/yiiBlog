@@ -118,14 +118,20 @@ class CommentController extends Controller
 	}
 
 	/**
-	 * Lists all models.
+	 * Lists all models. Pending ones first
 	 */
 	public function actionIndex()
 	{
-		$dataProvider=new CActiveDataProvider('Comment');
-		$this->render('index',array(
-			'dataProvider'=>$dataProvider,
-		));
+	    $dataProvider=new CActiveDataProvider('Comment', array(
+	        'criteria'=>array(
+	            'with'=>'post',
+	            'order'=>'t.status, t.create_time DESC',
+	        ), // a bit confused about the CActiveDataProvider class works.
+	    ));
+	 
+	    $this->render('index',array(
+	        'dataProvider'=>$dataProvider,
+	    ));
 	}
 
 	/**
@@ -169,5 +175,17 @@ class CommentController extends Controller
 			echo CActiveForm::validate($model);
 			Yii::app()->end();
 		}
+	}
+
+	public function actionApprove()
+	{
+	    if(Yii::app()->request->isPostRequest) // and not get or put
+	    {
+	        $comment=$this->loadModel();
+	        $comment->approve();
+	        $this->redirect(array('index'));
+	    }
+	    else
+	        throw new CHttpException(400,'Invalid request...');
 	}
 }
