@@ -46,6 +46,7 @@ class PostController extends Controller
 	 */
 	public function actionView()
 	{
+		print("ActionView called;");
 		$post=$this->loadModel();
 		$comment=$this->newComment($post); // calling this method before rendering the view.
 		$this->render('view',array(
