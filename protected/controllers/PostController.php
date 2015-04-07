@@ -2,6 +2,8 @@
 
 class PostController extends Controller
 {
+
+	private $_model;
 	/**
 	 * @var string the default layout for the views. Defaults to '//layouts/column2', meaning
 	 * using two-column layout. See 'protected/views/layouts/column2.php'.
@@ -46,34 +48,27 @@ class PostController extends Controller
 	 */
 	public function actionView()
 	{
-		print("ActionView called;");
-		$post=$this->loadModel();
-		$comment=$this->newComment($post); // calling this method before rendering the view.
-		$this->render('view',array(
-			'model'=>$post,
-			'comment'=>$comment,
-		));
+	    $post=$this->loadModel();
+	    $this->render('view',array(
+	        'model'=>$post,
+	        'comment'=>$comment,
+	    ));
 	}
-
-	protected function newComment($post) 
+	 
+	protected function newComment($post)
 	{
-		$comment=new Comment;
-
-		if(isset($_POST['ajax']) && $_POST['afax']=='comment_form') // checks whether there is a post variable named AJAX and whether it equals to 'comment-_form'
-		{
-			echo CActiveForm::validate($comment);
-			Yii::app()->end();
-		}
-		if(isset($_POST['Comment']))
-		{
-			$comment->attributes=$_POST['Comment'];
-			if($post->addComment($comment))
-			{
-				if($comment->status==Comment::STATUS_PENDING)
-					Yii::app()->user->setFlash('commentSubmitted','Thank you for your comment. Your comment will be posted once it is approved.');
-				$this->refresh();
-			}
-		}
+	    $comment=new Comment;
+	    if(isset($_POST['Comment']))
+	    {
+	        $comment->attributes=$_POST['Comment'];
+	        if($post->addComment($comment))
+	        {
+	            if($comment->status==Comment::STATUS_PENDING)
+	                Yii::app()->user->setFlash('commentSubmitted','Thank you for your comment. Your comment will be posted once it is approved.');
+	            $this->refresh();
+	        }
+	    }
+	    return $comment;
 	}
 
 
@@ -155,17 +150,14 @@ class PostController extends Controller
 	 */
 	public function actionIndex()
 	{
-		$criteria=new CDbCriteria(array(
+	    $criteria=new CDbCriteria(array(
 	        'condition'=>'status='.Post::STATUS_PUBLISHED,
-	        'order'=>'update_time DESC', // sorting time
-	        'with'=>'commentCount', // display how many comments were left
-	    )); // creating a new (query) CDbCriteria for retrieving post list
-
-	    if(isset($_GET['tag'])) // if user wants to look for a specific tag
-	        $criteria->addSearchCondition('tags',$_GET['tag']); // actual method in CDbCriteria object
-	 	
-	 	//resulting object which is going to have all the information needed to display an object
-	    // three purposes 1) pagination, 2) sorting according to the user's request 3)feeds the paginated and sorted data to widgets or view code for presentation.
+	        'order'=>'update_time DESC',
+	        'with'=>'commentCount',
+	    ));
+	    if(isset($_GET['tag']))
+	        $criteria->addSearchCondition('tags',$_GET['tag']);
+	 
 	    $dataProvider=new CActiveDataProvider('Post', array(
 	        'pagination'=>array(
 	            'pageSize'=>5,

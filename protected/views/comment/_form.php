@@ -1,4 +1,4 @@
-<?php
+f<?php
 /* @var $this CommentController */
 /* @var $model Comment */
 /* @var $form CActiveForm */
