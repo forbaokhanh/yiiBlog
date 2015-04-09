@@ -45,12 +45,21 @@ class Comment extends CActiveRecord
 	public function rules()
 	{
 	    return array(
-	        array('content, author, email', 'required'), // making sure that these attributes are required
-	        array('author, email, url', 'length', 'max'=>128), // making sure these atributes have a length less 128
-	        array('email','email'), // formatting an email
-	        array('url','url'), // formatting the url
+	        array('content, author, email', 'required'),
+	        array('author, email, url', 'length', 'max'=>128),
+	        array('email','email'),
+	        array('url','url'),
 	    );
 	}
+	// public function rules()
+	// {
+	//     return array(
+	//         array('content, author, email', 'required'), // making sure that these attributes are required
+	//         array('author, email, url', 'length', 'max'=>128), // making sure these atributes have a length less 128
+	//         array('email','email'), // formatting an email
+	//         array('url','url'), // formatting the url
+	//     );
+	// }
 
 	/**
 	 * @return array relational rules.
@@ -69,18 +78,17 @@ class Comment extends CActiveRecord
 	 */
 	public function attributeLabels()
 	{
-		return array(
-			'id' => 'ID',
-			'content' => 'Content',
-			'status' => 'Status',
-			'create_time' => 'Create Time',
-			'author' => 'Author',
-			'email' => 'Email',
-			'url' => 'Url',
-			'post_id' => 'Post',
-		);
+	    return array(
+	        'id' => 'Id',
+	        'content' => 'Comment',
+	        'status' => 'Status',
+	        'create_time' => 'Create Time',
+	        'author' => 'Name',
+	        'email' => 'Email',
+	        'url' => 'Website',
+	        'post_id' => 'Post',
+	    );
 	}
-
 	/**
 	 * Retrieves a list of models based on the current search/filter conditions.
 	 * @return CActiveDataProvider the data provider that can return the models based on the search/filter conditions.
@@ -106,17 +114,7 @@ class Comment extends CActiveRecord
 		));
 	}
 	// override the parents method to include the time the comment was made
-	protected function beforeSave()
-	{
-	    if(parent::beforeSave())
-	    {
-	        if($this->isNewRecord)
-	            $this->create_time=time();
-	        return true;
-	    }
-	    else
-	        return false;
-	}
+	
 
 	public function approve()
 	{
@@ -124,12 +122,17 @@ class Comment extends CActiveRecord
 	    $this->update(array('status'));
 	}
 
+	public function getPendingCommentCount()
+	{
+	    return $this->count('status=:status', array(':status'=>self::STATUS_PENDING));
+	}
+
 	public function findRecentComments($limit=10)
-    {
-        return $this->with('post')->findAll(array(
-            'condition'=>'t.status='.self::STATUS_APPROVED,
-            'order'=>'t.create_time DESC',
-            'limit'=>$limit,
-        ));
-    }
+	{
+		return $this->with('post')->findAll(array(
+			'condition'=>'t.status='.self::STATUS_APPROVED,
+			'order'=>'t.create_time DESC',
+			'limit'=>$limit,
+		));
+	}
 }

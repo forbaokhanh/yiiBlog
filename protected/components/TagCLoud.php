@@ -1,3 +1,4 @@
+<?php
 Yii::import('zii.widgets.CPortlet');
  
 class TagCloud extends CPortlet

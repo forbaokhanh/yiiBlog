@@ -6,7 +6,7 @@ $this->breadcrumbs=array(
 );
 ?>
 <h1>Manage Posts</h1>
- <!-- CGridView allows to sort by a column and paginate -->
+ 
 <?php $this->widget('zii.widgets.grid.CGridView', array(
     'dataProvider'=>$model->search(),
     'filter'=>$model,

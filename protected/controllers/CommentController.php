@@ -126,7 +126,7 @@ class CommentController extends Controller
 	        'criteria'=>array(
 	            'with'=>'post',
 	            'order'=>'t.status, t.create_time DESC',
-	        ), // a bit confused about the CActiveDataProvider class works.
+	        ),
 	    ));
 	 
 	    $this->render('index',array(
@@ -179,7 +179,7 @@ class CommentController extends Controller
 
 	public function actionApprove()
 	{
-	    if(Yii::app()->request->isPostRequest) // and not get or put
+	    if(Yii::app()->request->isPostRequest)
 	    {
 	        $comment=$this->loadModel();
 	        $comment->approve();

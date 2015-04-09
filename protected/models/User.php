@@ -103,9 +103,9 @@ class User extends CActiveRecord
 	// What the hell is the :: thingy? Is it calling a Static Method? oh, it might be.
 	// Or it could also be a static variable of a class.
 	public function validatePassword($password)
-	{
-		return CPasswordHelper::verifyPassword($password,$this->password);
-	}
+    {
+        return CPasswordHelper::verifyPassword($password,$this->password);
+    }
 
 	/**
 	 * Generates a salt that can be used to generate a password hash.
@@ -117,7 +117,7 @@ class User extends CActiveRecord
 	}
 	
 	public function hashPassword($password)
-	{
-		return CPasswordHelper::hashPassword($password);
-	}
+    {
+        return CPasswordHelper::hashPassword($password);
+    }
 }
