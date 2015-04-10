@@ -93,7 +93,7 @@ class Lookup extends CActiveRecord
 			'criteria'=>$criteria,
 		));
 	}
-
+	
 	private static $_items=array();
  
     public static function items($type)

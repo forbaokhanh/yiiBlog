@@ -1,5 +1,3 @@
-<!-- admin view -->
-
 <?php
 $this->breadcrumbs=array(
     'Manage Posts',
@@ -10,7 +8,7 @@ $this->breadcrumbs=array(
 <?php $this->widget('zii.widgets.grid.CGridView', array(
     'dataProvider'=>$model->search(),
     'filter'=>$model,
-    'columns'=>array(
+    'columns'=>array( // creates three columns
         array(
             'name'=>'title',
             'type'=>'raw',

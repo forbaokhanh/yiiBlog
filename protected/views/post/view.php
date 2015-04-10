@@ -37,9 +37,9 @@ $this->menu=array(
             <?php echo $model->commentCount . 'comment(s)'; ?>
         </h3>
  
-        <?php $this->renderPartial('_comments',array( // render a partial view named _comments to display the list of comments of the current post
+        <?php $this->renderPartial('_comments',array(
             'post'=>$model,
-            'comments'=>$model->comments, //we have declared a comments relation in the Post model
+            'comments'=>$model->comments,
         )); ?>
     <?php endif; ?>
     <h3>Leave a Comment</h3>
@@ -49,7 +49,7 @@ $this->menu=array(
             <?php echo Yii::app()->user->getFlash('commentSubmitted'); ?>
         </div>
     <?php else: ?>
-        <?php $this->renderPartial('/comment/_form',array( // rednering into the comment/_form in views.
+        <?php $this->renderPartial('/comment/_form',array(
             'model'=>$comment,
         )); ?>
     <?php endif; ?>

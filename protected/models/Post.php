@@ -19,12 +19,9 @@
  */
 class Post extends CActiveRecord
 {
-
 	const STATUS_DRAFT=1;
     const STATUS_PUBLISHED=2;
     const STATUS_ARCHIVED=3;
-    private $_oldTags;
-
 	/**
 	 * Returns the static model of the specified AR class.
 	 * @param string $className active record class name.
@@ -43,6 +40,16 @@ class Post extends CActiveRecord
 		return '{{post}}';
 	}
 
+	public function addComment($comment)
+	{
+	    if(Yii::app()->params['commentNeedApproval'])
+	        $comment->status=Comment::STATUS_PENDING;
+	    else
+	        $comment->status=Comment::STATUS_APPROVED;
+	    $comment->post_id=$this->id;
+	    return $comment->save();
+	}
+
 	/**
 	 * @return array validation rules for model attributes.
 	 */
@@ -59,30 +66,16 @@ class Post extends CActiveRecord
 	        array('title, status', 'safe', 'on'=>'search'),
 	    );
 	}
-	// public function rules()
-	// {
-	// 	// NOTE: you should only define rules for those attributes that
-	// 	// will receive user inputs.
-	// 	return array(
-	// 		array('title, content, status, author_id', 'required'),
-	// 		array('title', 'length', 'max'=>128), // Maximum length of a title is now set to 128 characters
-	// 		array('status', 'in', 'range'=>array(1,2,3)), //DRAFT, PUBLISHED OR ARCHIVED
-	// 		array('tags', 'match', 'pattern'=>'/^[\w\s,]+$/',
- //            'message'=>'Tags can only contain word characters.'), 
- //        	array('tags', 'normalizeTags'), // to normalize the user-entered tags so that the tags are unique and properly separated with commas.
- //        	array('title, status', 'safe', 'on'=>'search'),
-	// 		// The following rule is used by search().
-	// 		// Please remove those attributes that should not be searched.
-	// 	);
-	// }
 
 	/**
 	 * @return array relational rules.
 	 */
 	public function relations()
 	{
-	    return array(
-	        'author' => array(self::BELONGS_TO, 'User', 'author_id'),
+		// NOTE: you may need to adjust the relation name and the related
+		// class name for the relations automatically generated below.
+		return array(
+        	'author' => array(self::BELONGS_TO, 'User', 'author_id'),
 	        'comments' => array(self::HAS_MANY, 'Comment', 'post_id',
 	            'condition'=>'comments.status='.Comment::STATUS_APPROVED,
 	            'order'=>'comments.create_time DESC'),
@@ -90,20 +83,6 @@ class Post extends CActiveRecord
 	            'condition'=>'status='.Comment::STATUS_APPROVED),
 	    );
 	}
-	// public function relations()
-	// {
-	// 	// NOTE: you may need to adjust the relation name and the related
-	// 	// class name for the relations automatically generated below.
-	// 	// this syntax is confusing
-	// 	return array(
- //        'author' => array(self::BELONGS_TO, 'User', 'author_id'),
- //        'comments' => array(self::HAS_MANY, 'Comment', 'post_id',
- //            'condition'=>'comments.status='.Comment::STATUS_APPROVED,
- //            'order'=>'comments.create_time DESC'),
- //        'commentCount' => array(self::STAT, 'Comment', 'post_id',
- //            'condition'=>'status='.Comment::STATUS_APPROVED),
- //    	);
-	// }
 
 	/**
 	 * @return array customized attribute labels (name=>label)
@@ -160,13 +139,13 @@ class Post extends CActiveRecord
         ));
     }
 
-	protected function beforeSave()
+    protected function beforeSave()
 	{
-	    if(parent::beforeSave()) // I guess we are overriding this method from the CActiverecord class
+	    if(parent::beforeSave())
 	    {
-	        if($this->isNewRecord) // If this is creating a new post, only question how does it do the isNewrecord method?
+	        if($this->isNewRecord)
 	        {
-	            $this->create_time=$this->update_time=time(); // Setting both create_time and update_time values to time()
+	            $this->create_time=$this->update_time=time();
 	            $this->author_id=Yii::app()->user->id;
 	        }
 	        else
@@ -180,8 +159,10 @@ class Post extends CActiveRecord
 	protected function afterSave()
 	{
 	    parent::afterSave();
-	    Tag::model()->updateFrequency($this->_oldTags, $this->tags); // what does the updateFrequency method do?
+	    Tag::model()->updateFrequency($this->_oldTags, $this->tags);
 	}
+	 
+	private $_oldTags;
 	 
 	protected function afterFind()
 	{
@@ -189,13 +170,10 @@ class Post extends CActiveRecord
 	    $this->_oldTags=$this->tags;
 	}
 
-	public function addComment($comment)
+	protected function afterDelete()
 	{
-	    if(Yii::app()->params['commentNeedApproval'])
-	        $comment->status=Comment::STATUS_PENDING;
-	    else
-	        $comment->status=Comment::STATUS_APPROVED;
-	    $comment->post_id=$this->id;
-	    return $comment->save();
+	    parent::afterDelete();
+	    Comment::model()->deleteAll('post_id='.$this->id);
+	    Tag::model()->updateFrequency($this->tags, '');
 	}
 }

@@ -2,7 +2,6 @@
 
 class PostController extends Controller
 {
-
 	private $_model;
 	/**
 	 * @var string the default layout for the views. Defaults to '//layouts/column2', meaning
@@ -34,7 +33,7 @@ class PostController extends Controller
 	            'users'=>array('*'),
 	        ),
 	        array('allow', // allow authenticated users to perform any action
-	            'users'=>array('@'), //@ authenticated, * everything else
+	            'users'=>array('@'),
 	        ),
 	        array('deny',  // deny all users
 	            'users'=>array('*'),
@@ -49,7 +48,8 @@ class PostController extends Controller
 	public function actionView()
 	{
 	    $post=$this->loadModel();
-	    $comment=new Comment;
+	    $comment=$this->newComment($post);
+	 
 	    $this->render('view',array(
 	        'model'=>$post,
 	        'comment'=>$comment,
@@ -78,8 +78,6 @@ class PostController extends Controller
 	    }
 	    return $comment;
 	}
-
-
 	/**
 	 * Creates a new model.
 	 * If creation is successful, the browser will be redirected to the 'view' page.
@@ -132,7 +130,7 @@ class PostController extends Controller
 	 * If deletion is successful, the browser will be redirected to the 'admin' page.
 	 * @param integer $id the ID of the model to be deleted
 	 */
-		public function actionDelete()
+	public function actionDelete()
 	{
 	    if(Yii::app()->request->isPostRequest)
 	    {
@@ -144,26 +142,6 @@ class PostController extends Controller
 	    }
 	    else
 	        throw new CHttpException(400,'Invalid request. Please do not repeat this request again.');
-	}
-	// public function actionDelete()
-	// {
-	//     if(Yii::app()->request->isPostRequest) // Only allowing deletions via post request
-	//     {
-	//         // we only allow deletion via POST request
-	//         $this->loadModel()->delete();
-	
-	//         if(!isset($_GET['ajax'])) // only reload if it was not an ajax call
-	//             $this->redirect(array('index'));
-	//     }
-	//     else
-	//         throw new CHttpException(400,'Invalid request. Please do not repeat this request again.');
-	// }
-
-	protected function afterDelete()
-	{
-	    parent::afterDelete(); // doing the afterDelete action of the class it inherits from
-	    Comment::model()->deleteAll('post_id='.$this->id); // deletes the comments for that post
-	    Tag::model()->updateFrequency($this->tags, ''); // updates the tags to nothing
 	}
 
 	/**
@@ -190,27 +168,6 @@ class PostController extends Controller
 	        'dataProvider'=>$dataProvider,
 	    ));
 	}
-	// public function actionIndex()
-	// {
-	//     $criteria=new CDbCriteria(array(
-	//         'condition'=>'status='.Post::STATUS_PUBLISHED,
-	//         'order'=>'update_time DESC',
-	//         'with'=>'commentCount',
-	//     ));
-	//     if(isset($_GET['tag']))
-	//         $criteria->addSearchCondition('tags',$_GET['tag']);
-	 
-	//     $dataProvider=new CActiveDataProvider('Post', array(
-	//         'pagination'=>array(
-	//             'pageSize'=>5,
-	//         ),
-	//         'criteria'=>$criteria,
-	//     ));
-	 
-	//     $this->render('index',array(
-	//         'dataProvider'=>$dataProvider,
-	//     ));
-	// }
 
 	/**
 	 * Manages all models.
@@ -224,17 +181,6 @@ class PostController extends Controller
 	        'model'=>$model,
 	    ));
 	}
-	// public function actionAdmin()
-	// {
-	// 	$model=new Post('search'); // creates a POst model under search scenario.
-	// 	$model->unsetAttributes();  // clear any default values
-	// 	if(isset($_GET['Post']))
-	// 		$model->attributes=$_GET['Post']; // collectin the search condition that a user specifies(user supplied data)
-
-	// 	$this->render('admin',array( // finally render this information to the admin view
-	// 		'model'=>$model,
-	// 	));
-	// }
 
 	/**
 	 * Returns the data model based on the primary key given in the GET variable.
@@ -261,28 +207,6 @@ class PostController extends Controller
 	    }
 	    return $this->_model;
 	}
-	// public function loadModel()
-	// {
-	//     if($this->_model===null)
-	//     {
-	//         if(isset($_GET['id'])) // returning the SQL statement
-	//         {
-	//         	// If the user is authenticated and is a Guest only allow him to view Published and archived posts.
-	//             if(Yii::app()->user->isGuest)
-	//             	// This syntax is a bit confusing. But you are setting the condition varable to some constant
-	//                 $condition='status='.Post::STATUS_PUBLISHED
-	//                     .' OR status='.Post::STATUS_ARCHIVED;
-	//             else
-	//             	// or nothing
-	//                 $condition='';
-	//             // Finding a post by a Pk? $_GET['id'] returns a primary key? Finds a single active record with a specified primary key.
-	//             $this->_model=Post::model()->findByPk($_GET['id'], $condition); //findBySql(string $sql, array $params=array ( ))
-	//         }
-	//         if($this->_model===null)
-	//             throw new CHttpException(404,'The requested page does not exist.');
-	//     }
-	//     return $this->_model;
-	// }
 
 	/**
 	 * Performs the AJAX validation.

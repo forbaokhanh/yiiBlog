@@ -1401,3 +1401,28 @@ in /Applications/MAMP/htdocs/blog/index.php (13)
 2015/04/08 19:48:14 [warning] [application] Failed to set unsafe attribute "author_id" of "Post".
 in /Applications/MAMP/htdocs/blog/protected/controllers/PostController.php (96)
 in /Applications/MAMP/htdocs/blog/index.php (13)
+2015/04/09 23:25:42 [error] [exception.CException] exception 'CException' with message 'PostController cannot find the requested view "_comments".' in /Applications/MAMP/yii/framework/web/CController.php:878
+Stack trace:
+#0 /Applications/MAMP/htdocs/blog/protected/views/post/view.php(43): CController->renderPartial('_comments', Array)
+#1 /Applications/MAMP/yii/framework/web/CBaseController.php(126): require('/Applications/M...')
+#2 /Applications/MAMP/yii/framework/web/CBaseController.php(95): CBaseController->renderInternal('/Applications/M...', Array, true)
+#3 /Applications/MAMP/yii/framework/web/CController.php(869): CBaseController->renderFile('/Applications/M...', Array, true)
+#4 /Applications/MAMP/yii/framework/web/CController.php(782): CController->renderPartial('view', Array, true)
+#5 /Applications/MAMP/htdocs/blog/protected/controllers/PostController.php(56): CController->render('view', Array)
+#6 /Applications/MAMP/yii/framework/web/actions/CInlineAction.php(49): PostController->actionView()
+#7 /Applications/MAMP/yii/framework/web/CController.php(308): CInlineAction->runWithParams(Array)
+#8 /Applications/MAMP/yii/framework/web/filters/CFilterChain.php(133): CController->runAction(Object(CInlineAction))
+#9 /Applications/MAMP/yii/framework/web/filters/CFilter.php(40): CFilterChain->run()
+#10 /Applications/MAMP/yii/framework/web/CController.php(1145): CFilter->filter(Object(CFilterChain))
+#11 /Applications/MAMP/yii/framework/web/filters/CInlineFilter.php(58): CController->filterAccessControl(Object(CFilterChain))
+#12 /Applications/MAMP/yii/framework/web/filters/CFilterChain.php(130): CInlineFilter->filter(Object(CFilterChain))
+#13 /Applications/MAMP/yii/framework/web/CController.php(291): CFilterChain->run()
+#14 /Applications/MAMP/yii/framework/web/CController.php(265): CController->runActionWithFilters(Object(CInlineAction), Array)
+#15 /Applications/MAMP/yii/framework/web/CWebApplication.php(282): CController->run('view')
+#16 /Applications/MAMP/yii/framework/web/CWebApplication.php(141): CWebApplication->runController('post/view')
+#17 /Applications/MAMP/yii/framework/base/CApplication.php(169): CWebApplication->processRequest()
+#18 /Applications/MAMP/htdocs/blog/index.php(13): CApplication->run()
+#19 {main}
+REQUEST_URI=/blog/index.php/post/view?id=2
+HTTP_REFERER=http://localhost:8888/blog/
+---
